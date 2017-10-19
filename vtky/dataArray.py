@@ -11,16 +11,21 @@ class DataArray(vtk.vtkDataArray):
         :return:
         '''
         if self._data.size == 0:
-            _data = col_val
+            self._data = col_val
+        else:
+            self._data = np.column_stack((self._data, col_val))
 
     def add_row(self, row_val):
-        pass
+        if self._data.size == 0:
+            self._data = row_val
+        else:
+            self._data = np.vstack((self._data, row_val))
 
     def __eq__(self, other):
         pass
 
     def __getitem__(self, item):
-        pass
+        return self._data.item(item)
 
     def __setitem__(self, key, value):
         pass
