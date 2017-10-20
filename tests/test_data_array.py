@@ -1,11 +1,11 @@
 import pytest
 import numpy as np
 
-from vtky.doubleArray import DoubleArray
+from vtky.baseArray import BaseArray
 
 @pytest.fixture
 def data_array():
-    result = DoubleArray(np.arange(10))
+    result = BaseArray(np.arange(10, dtype='d'))
     result.SetName('test_name')
     return result
 
