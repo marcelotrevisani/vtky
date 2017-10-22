@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from vtk.util import numpy_support as ns
-
+import six
 
 class BaseArray(object):
 
@@ -21,10 +21,13 @@ class BaseArray(object):
 
 
     def __getattr__(self, item):
-        try:
-            return getattr(self._vtk, item)
-        except AttributeError as msg:
-            raise AttributeError('Object has not attribute {}'.format(msg.message))
+        if isinstance(item, six.string_types) and item == 'array':
+            return self._numpy
+        else:
+            try:
+                return getattr(self._vtk, item)
+            except AttributeError as msg:
+                raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __eq__(self, other):
         if isinstance(other, np.ndarray):
@@ -58,6 +61,7 @@ class BaseArray(object):
             self._numpy = row_val
         else:
             self._numpy = np.vstack((self._numpy, row_val))
+            self._set_data_array(self._numpy)
 
     def _set_data_array(self, array):
         '''

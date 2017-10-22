@@ -17,6 +17,9 @@ def data_array2():
     return result
 
 def test_data_array(data_array1, data_array2):
+    assert data_array1 == data_array1
+    assert data_array2 == data_array2
 
+    assert data_array1 != data_array2
 
 
