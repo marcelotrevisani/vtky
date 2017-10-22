@@ -23,7 +23,7 @@ class BaseArray(object):
     def __getattr__(self, item):
         try:
             return getattr(self._vtk, item)
-        except AttributeError, msg:
+        except AttributeError as msg:
             raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __eq__(self, other):
