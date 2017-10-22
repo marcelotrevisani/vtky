@@ -6,8 +6,8 @@ from vtk.util import numpy_support as ns
 class BaseArray(object):
 
     def __init__(self, np_array):
-        type = ns.get_vtk_array_type(np_array)
-        self._vtk = ns.create_vtk_array(type)
+        vtk_type = ns.get_vtk_array_type(np_array.dtype)
+        self._vtk = ns.create_vtk_array(vtk_type)
 
         if isinstance(np_array, list):
             np_array = np.array(np_array)
@@ -18,6 +18,7 @@ class BaseArray(object):
             self._set_data_array(np_array)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(np_array)))
+
 
     def __getattr__(self, item):
         try:

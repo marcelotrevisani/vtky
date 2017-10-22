@@ -1,3 +1,4 @@
 {
-  "test_data_array.py": true
+  "test_data_array.py": true, 
+  "test_data_array.py::test_copy_array": true
 }
