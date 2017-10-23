@@ -23,6 +23,7 @@ Features
 
 To Do
 -----
+* Tests to see if support multidimensional arrays
 * Support for vtk data objects:
     * vtkPoints
     * vtkPointData
