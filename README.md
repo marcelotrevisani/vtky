@@ -7,7 +7,7 @@ This project is just to easily manipulate the vtk library
 Features
 --------
 
-Support to use objects such as:
+* Support to use objects such as:
     * vtkDoubleArray
     * vtkFloatArray
     * vtkIntArray
@@ -42,11 +42,12 @@ To Do
 * Support to build the vtk pipeline
 * Support for filters
 * Easily plot vtk objects
-* Support to qt
-* Support to matplotlib
-* Support to use scikit-learn
-* Support to use pandas
-* Support to use scipy
+* Support for:
+   * qt
+   * matplotlib
+   * scikit-learn
+   * pandas
+   * scipy
 
 
 Requirements
@@ -78,10 +79,10 @@ Contributions are very welcome.
 License
 -------
 
-Distributed under the terms of the `MIT`_ license, "pytest-vtk" is free and open source software
+Distributed under the terms of the `MIT` license, "pytest-vtk" is free and open source software
 
 
 Issues
 ------
 
-If you encounter any problems, please `file an issue`_ along with a detailed description.
+If you encounter any problems, please `file an issue` along with a detailed description.
