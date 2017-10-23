@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from vtky.baseArray import BaseArray
+from vtky.BaseArray import BaseArray
 
 @pytest.fixture
 def data_array1():
@@ -21,5 +21,20 @@ def test_data_array(data_array1, data_array2):
     assert data_array2 == data_array2
 
     assert data_array1 != data_array2
+
+    assert data_array1[0] == data_array1.GetTuple1(0)
+    assert data_array1[0] == 0
+    assert data_array1.GetTuple1(0) == 0
+
+    assert data_array1[9] == data_array1.GetTuple1(9)
+    assert data_array1[9] == 9
+    assert data_array1.GetTuple1(9) == 9
+
+    data_array1[9] = 10
+    assert data_array1[9] == data_array1.GetTuple1(9)
+    assert data_array1[9] == 10
+    assert data_array1.GetTuple1(9) == 10
+
+
 
 

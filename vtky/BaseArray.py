@@ -1,20 +1,22 @@
 import numpy as np
 import pandas as pd
-from vtk.util import numpy_support as ns
 import six
+from vtk.util import numpy_support as ns
+
 
 class BaseArray(object):
 
-    def __init__(self, np_array):
-        vtk_type = ns.get_vtk_array_type(np_array.dtype)
-        self._vtk = ns.create_vtk_array(vtk_type)
-
+    def __init__(self, np_array, type=None):
         if isinstance(np_array, list):
             np_array = np.array(np_array)
         elif isinstance(np_array, pd.DataFrame):
             np_array = np_array.as_matrix()
 
         if isinstance(np_array, np.ndarray):
+            if type:
+                np_array = np_array.astype(type)
+            vtk_type = ns.get_vtk_array_type(np_array.dtype)
+            self._vtk = ns.create_vtk_array(vtk_type)
             self._set_data_array(np_array)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(np_array)))
@@ -32,7 +34,7 @@ class BaseArray(object):
     def __eq__(self, other):
         if isinstance(other, np.ndarray):
             return np.array_equal(self._numpy, other)
-        if isinstance(other, type(self)) and not np.array_equal(self._numpy, ns.vtk_to_numpy(other)):
+        if isinstance(other, type(self)) and not np.array_equal(self._numpy, other.array):
             return False
         return self.GetNumberOfComponents() == other.GetNumberOfComponents() and \
                self.GetNumberOfTuples() == other.GetNumberOfTuples() and \
@@ -57,6 +59,10 @@ class BaseArray(object):
         self._numpy[key] = value
 
     def add_row(self, row_val):
+        '''
+        Receives a new row which will be add to the vtkDataArray
+        :param row_val: Receives a numpy array or a list to be add
+        '''
         if self._numpy.size == 0:
             self._numpy = row_val
         else:
@@ -82,4 +88,10 @@ class BaseArray(object):
         self.SetVoidArray(data_flat, len(data_flat), 1)
 
     def copy_array(self, array):
+        '''
+        Set the data to the vtkDataArray
+        :param array: receives a pandas DataFrame, numpy array or a list
+        :return:
+        '''
         self._set_data_array(array)
+
