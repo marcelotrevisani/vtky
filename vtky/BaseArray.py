@@ -58,6 +58,9 @@ class BaseArray(object):
     def __setitem__(self, key, value):
         self._numpy[key] = value
 
+    def __str__(self):
+        return '{}\n{}'.format(self.GetName(), self._numpy)
+
     def add_row(self, row_val):
         '''
         Receives a new row which will be add to the vtkDataArray
