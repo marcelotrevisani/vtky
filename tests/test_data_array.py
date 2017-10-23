@@ -93,3 +93,15 @@ def test_data_array_slice(data_array1):
     assert sl[2] == data_array1.GetTuple1(4)
     assert sl[3] == data_array1.GetTuple1(6)
     assert sl[4] == data_array1.GetTuple1(8)
+
+
+def test_create_basearray_vtk(vtk_double, data_array2):
+    base_array = BaseArray(vtk_double)
+    assert data_array2 == base_array
+    assert str(data_array2) == str(base_array)
+    assert data_array2.GetName() == base_array.GetName()
+
+    assert vtk_double.GetTuple1(0) == base_array[0]
+
+
+

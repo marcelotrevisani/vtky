@@ -1,25 +1,35 @@
 import numpy as np
 import pandas as pd
 import six
+import vtk
 from vtk.util import numpy_support as ns
 
 
 class BaseArray(object):
 
-    def __init__(self, np_array, type=None):
-        if isinstance(np_array, list):
-            np_array = np.array(np_array)
-        elif isinstance(np_array, pd.DataFrame):
-            np_array = np_array.as_matrix()
+    def __init__(self, array, type=np.double):
+        if isinstance(array, list):
+            array = np.array(array)
+        elif isinstance(array, pd.DataFrame):
+            array = array.as_matrix()
 
-        if isinstance(np_array, np.ndarray):
+        if isinstance(array, np.ndarray):
             if type:
-                np_array = np_array.astype(type)
-            vtk_type = ns.get_vtk_array_type(np_array.dtype)
+                array = array.astype(type)
+            vtk_type = ns.get_vtk_array_type(array.dtype)
             self._vtk = ns.create_vtk_array(vtk_type)
-            self._set_data_array(np_array)
+            self._set_data_array(array)
+        elif isinstance(array, vtk.vtkDataArray):
+            if array.GetDataType() == ns.get_vtk_array_type(type):
+                self._vtk = array
+                self._numpy = ns.vtk_to_numpy(array)
+            else:
+                np_array = ns.vtk_to_numpy(array).astype(type)
+                self._vtk = ns.create_vtk_array(ns.get_vtk_array_type(np_array))
+                self._vtk.SetName(array.GetName())
+                self._set_data_array(np_array)
         else:
-            raise ValueError('Expected a Numpy array, but received a: {}'.format(type(np_array)))
+            raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
 
     def __getattr__(self, item):
