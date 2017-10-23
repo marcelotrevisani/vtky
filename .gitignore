@@ -74,3 +74,4 @@ target/
 # pycharm
 .idea/
 .cache/
+/tests/.cache/
