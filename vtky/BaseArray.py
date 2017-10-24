@@ -1,5 +1,3 @@
-from inspect import ismethod
-
 import numpy as np
 import pandas as pd
 import vtk
@@ -58,12 +56,30 @@ class BaseArray(object):
 
     def __getattr__(self, item):
         try:
-            return getattr(self._vtk, item)
+            attr = getattr(self._vtk, item)
+            if hasattr(attr, "__self__") and attr.__self__ is self._vtk:
+                def _vtk_method_proxy(*args, **kwargs):
+                    '''
+                    This is black magic, do not do this at home. :)
+                    It is need because the self._vtk.AddObserver(vtk.vtkCommand.ModifiedEvent, self._update_numpy)
+                    only works if the method Modified() is called, when we add a value or remove it, it will not
+                    be called.
+                    :param args:
+                    :param kwargs:
+                    :return:
+                    '''
+                    result = attr(*args, **kwargs)
+                    self._update_numpy()
+                    return result
+
+                return _vtk_method_proxy
+            else:
+                return attr
         except AttributeError as msg:
             raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __eq__(self, other):
-        if isinstance(other, np.ndarray):
+        if isinstance(other, (np.ndarray, list)):
             return np.array_equal(self._numpy, other)
         condition = True
         if isinstance(other, BaseArray):
@@ -121,10 +137,8 @@ class BaseArray(object):
         self._numpy = data_flat
         self.SetVoidArray(self._numpy, len(data_flat), 1)
 
-    def _update_numpy(self, *args, **kwargs):
-        # array = ns.vtk_to_numpy(self._vtk)
-        # self._vtk
-        self._set_data_array(ns.vtk_to_numpy(self._vtk))
+    def _update_numpy(self):
+        self._numpy = ns.vtk_to_numpy(self._vtk)
 
 
     def copy_array(self, array):

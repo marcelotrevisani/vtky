@@ -103,4 +103,18 @@ def test_create_basearray_vtk(vtk_double, data_array2):
     assert vtk_double.GetTuple1(0) == base_array[0]
 
 
+def test_insert_remove_values_vtk(vtk_double):
+    array = BaseArray(vtk_double)
+    array.InsertNextValue(99)
+    assert array.GetTuple1(5) == 99
+    assert array.numpy.size == 6
+    assert array[5] == 99
+    assert array == np.array([0, 1, 2, 3, 4, 99])
+    assert array == [0, 1, 2, 3, 4, 99]
 
+    array.RemoveLastTuple()
+    assert array.numpy.size == 5
+    assert array[4] == 4
+    assert array == [0, 1, 2, 3, 4]
+    assert array == np.array([0, 1, 2, 3, 4])
+    assert array.GetTuple1(4) == 4
