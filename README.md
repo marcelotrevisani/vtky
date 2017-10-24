@@ -87,3 +87,10 @@ Issues
 ------
 
 If you encounter any problems, please `file an issue` along with a detailed description.
+
+Contributors
+------------
+Many thanks to:
+
+* Bruno Oliveira (@nicoddemus)
+* Tadeu Manoel (@tadeu)

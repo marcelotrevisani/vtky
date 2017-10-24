@@ -1,5 +1,7 @@
-from vtky.BaseArray import BaseArray
 import numpy as np
+
+from vtky.BaseArray import BaseArray
+
 
 class DoubleArray(BaseArray):
     def __init__(self, array=np.array([])):

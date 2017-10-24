@@ -7,13 +7,16 @@ from vtk.util import numpy_support as ns
 
 class BaseArray(object):
 
-    def __init__(self, array, type=np.double):
+    def __init__(self, array, type=None):
         if isinstance(array, list):
             array = np.array(array)
         elif isinstance(array, pd.DataFrame):
             array = array.as_matrix()
 
         if isinstance(array, np.ndarray):
+            if not array.flags.contiguous:
+                array = np.ascontiguousarray(array)
+
             if type:
                 array = array.astype(type)
             vtk_type = ns.get_vtk_array_type(array.dtype)
@@ -31,10 +34,11 @@ class BaseArray(object):
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
-
     def __getattr__(self, item):
         if isinstance(item, six.string_types) and item == 'array':
             return self._numpy
+        elif isinstance(item, six.string_types) and item == 'vtk':
+            return self._vtk
         else:
             try:
                 return getattr(self._vtk, item)
@@ -107,4 +111,3 @@ class BaseArray(object):
         :return:
         '''
         self._set_data_array(array)
-
