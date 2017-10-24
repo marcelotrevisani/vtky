@@ -1,3 +1,5 @@
+from inspect import ismethod
+
 import numpy as np
 import pandas as pd
 import vtk
@@ -15,23 +17,25 @@ class BaseArray(object):
         if isinstance(array, np.ndarray):
             if not array.flags.contiguous:
                 array = np.ascontiguousarray(array)
-
             if type:
                 array = array.astype(type)
-            vtk_type = ns.get_vtk_array_type(array.dtype)
-            self._vtk = ns.create_vtk_array(vtk_type)
-            self._set_data_array(array)
+            self._numpy = array
+            self._vtk = ns.numpy_to_vtk(self._numpy)
+            self._vtk._np = array
         elif isinstance(array, vtk.vtkDataArray):
-            if array.GetDataType() == ns.get_vtk_array_type(type):
+            if type is None or array.GetDataType() == ns.get_vtk_array_type(type):
                 self._vtk = array
                 self._numpy = ns.vtk_to_numpy(array)
             else:
+                if type is None:
+                    type = np.double
                 np_array = ns.vtk_to_numpy(array).astype(type)
                 self._vtk = ns.create_vtk_array(ns.get_vtk_array_type(np_array))
                 self._vtk.SetName(array.GetName())
                 self._set_data_array(np_array)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
+        self._vtk.AddObserver(vtk.vtkCommand.ModifiedEvent, self._update_numpy)
 
     @property
     def numpy(self):
@@ -48,7 +52,7 @@ class BaseArray(object):
 
     @vtk.setter
     def vtk(self, vtk_object):
-        self._vtk
+        self._vtk = vtk_object
         array = ns.vtk_to_numpy(self._vtk)
         self._set_data_array(array)
 
@@ -61,12 +65,12 @@ class BaseArray(object):
     def __eq__(self, other):
         if isinstance(other, np.ndarray):
             return np.array_equal(self._numpy, other)
-        if isinstance(other, type(self)) and not np.array_equal(self._numpy, other.numpy):
-            return False
+        condition = True
+        if isinstance(other, BaseArray):
+            condition = self._numpy.shape == other._numpy.shape
         return self.GetNumberOfComponents() == other.GetNumberOfComponents() and \
                self.GetNumberOfTuples() == other.GetNumberOfTuples() and \
-               self._numpy.size == other.GetNumberOfTuples() and \
-               self.GetName() == other.GetName()
+               condition and self.GetName() == other.GetName()
 
     def __contains__(self, item):
         return item in self._numpy
@@ -115,7 +119,13 @@ class BaseArray(object):
         self.SetNumberOfTuples(array.shape[0])
         data_flat = np.ravel(array)
         self._numpy = data_flat
-        self.SetVoidArray(data_flat, len(data_flat), 1)
+        self.SetVoidArray(self._numpy, len(data_flat), 1)
+
+    def _update_numpy(self, *args, **kwargs):
+        # array = ns.vtk_to_numpy(self._vtk)
+        # self._vtk
+        self._set_data_array(ns.vtk_to_numpy(self._vtk))
+
 
     def copy_array(self, array):
         '''

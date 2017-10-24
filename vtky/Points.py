@@ -29,24 +29,51 @@ class Points(object):
             self._points = BaseArray(array)
             self._vtk = vtk.vtkPoints()
             self._vtk.SetData(self._points.vtk)
-            self.vtk.SetName(array_name)
+            self._points.SetName(array_name)
+            self._points = self._points.numpy.reshape(-1, 3)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
     def __eq__(self, other):
+        if isinstance(other, vtk.vtkPoints):
+            return self._points == other.GetData()
         return self._points == other
 
+    @property
+    def x(self):
+        return self._points.numpy[:, 0]
+
+    @x.setter
+    def x(self, value):
+        self._points.numpy[:, 0] = value
+
+    @property
+    def y(self):
+        return self._points.numpy[:, 1]
+
+    @y.setter
+    def y(self, value):
+        self._points.numpy[:, 1] = value
+
+    @property
+    def z(self):
+        return self._points.numpy[:, 2]
+
+    @z.setter
+    def z(self, value):
+        self._points.numpy[:, 2] = value
+
+    @property
+    def xyz(self):
+        return self._points
+
+    @xyz.setter
+    def xyz(self, value):
+        self._points = value
+
     def __getattr__(self, item):
-        if isinstance(item, six.string_types) and item == 'x':
-            return self._points[:, 0]
-        elif isinstance(item, six.string_types) and item == 'y':
-            return self._points[:, 1]
-        elif isinstance(item, six.string_types) and item == 'z' and self._points.shape[1] == 3:
-            return self._points[:, 2]
-        elif isinstance(item, six.string_types) and item == 'xyz':
-            return self._points
         try:
-            return getattr(self._vtk_points, item)
+            return getattr(self._vtk, item)
         except AttributeError as msg:
             raise AttributeError('Object has not attribute {}'.format(msg.message))
 

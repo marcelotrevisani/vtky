@@ -3,7 +3,6 @@ import vtk
 
 from vtky.DataArray import *
 
-
 @pytest.fixture
 def data_array1():
     result = BaseArray(np.arange(10, dtype='d'))
