@@ -41,8 +41,8 @@ def test_data_array(data_array1, data_array2):
 
     assert data_array1 == np.arange(10)
     assert data_array2 == np.arange(5)
-    assert np.array_equal(data_array1.array, np.arange(10))
-    assert np.array_equal(data_array2.array, np.arange(5))
+    assert np.array_equal(data_array1.numpy, np.arange(10))
+    assert np.array_equal(data_array2.numpy, np.arange(5))
 
     assert data_array1 != data_array2
 

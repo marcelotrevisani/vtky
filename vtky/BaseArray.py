@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import six
 import vtk
 from vtk.util import numpy_support as ns
 
@@ -34,21 +33,35 @@ class BaseArray(object):
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
+    @property
+    def numpy(self):
+        return self._numpy
+
+    @numpy.setter
+    def numpy(self, np_array):
+        self._numpy = np_array
+        self._set_data_array(np_array)
+
+    @property
+    def vtk(self):
+        return self._vtk
+
+    @vtk.setter
+    def vtk(self, vtk_object):
+        self._vtk
+        array = ns.vtk_to_numpy(self._vtk)
+        self._set_data_array(array)
+
     def __getattr__(self, item):
-        if isinstance(item, six.string_types) and item == 'array':
-            return self._numpy
-        elif isinstance(item, six.string_types) and item == 'vtk':
-            return self._vtk
-        else:
-            try:
-                return getattr(self._vtk, item)
-            except AttributeError as msg:
-                raise AttributeError('Object has not attribute {}'.format(msg.message))
+        try:
+            return getattr(self._vtk, item)
+        except AttributeError as msg:
+            raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __eq__(self, other):
         if isinstance(other, np.ndarray):
             return np.array_equal(self._numpy, other)
-        if isinstance(other, type(self)) and not np.array_equal(self._numpy, other.array):
+        if isinstance(other, type(self)) and not np.array_equal(self._numpy, other.numpy):
             return False
         return self.GetNumberOfComponents() == other.GetNumberOfComponents() and \
                self.GetNumberOfTuples() == other.GetNumberOfTuples() and \
