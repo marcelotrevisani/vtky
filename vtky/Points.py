@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import six
 import vtk
 
 from vtky.BaseArray import BaseArray
@@ -38,6 +37,7 @@ class Points(object):
         if isinstance(other, vtk.vtkPoints):
             return self._points == other.GetData()
         return self._points == other
+
 
     @property
     def x(self):

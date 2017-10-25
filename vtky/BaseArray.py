@@ -41,8 +41,12 @@ class BaseArray(object):
 
     @numpy.setter
     def numpy(self, np_array):
+        name = self.GetName()
+        new_vtk = ns.numpy_to_vtk(np_array, array_type=self._vtk.GetDataType())
+        new_vtk.SetName(name)
         self._numpy = np_array
-        self._set_data_array(np_array)
+        new_vtk._np = np_array
+        self._vtk = new_vtk
 
     @property
     def vtk(self):
@@ -106,7 +110,7 @@ class BaseArray(object):
         self._numpy[key] = value
 
     def __str__(self):
-        return '{}\n{}'.format(self.GetName(), self._numpy)
+        return '{}: {}'.format(self.GetName(), self._numpy)
 
     def add_row(self, row_val):
         '''
@@ -137,7 +141,11 @@ class BaseArray(object):
         self._numpy = data_flat
         self.SetVoidArray(self._numpy, len(data_flat), 1)
 
-    def _update_numpy(self):
+    def _update_numpy(self, *args, **kwargs):
+        '''
+        This method is called when the any method of the vtk is called
+        :return:
+        '''
         self._numpy = ns.vtk_to_numpy(self._vtk)
 
 

@@ -5,13 +5,13 @@ from vtky.DataArray import *
 
 @pytest.fixture
 def data_array1():
-    result = BaseArray(np.arange(10, dtype='d'))
+    result = BaseArray(np.arange(10, dtype=np.double))
     result.SetName('test_name')
     return result
 
 @pytest.fixture
 def data_array2():
-    np_array = np.arange(5, dtype='d')
+    np_array = np.arange(5, dtype=np.double)
     result = BaseArray(np_array)
     result.SetName('test_name_modified')
     return result
@@ -27,6 +27,7 @@ def vtk_double():
     result.InsertNextValue(4)
     return result
 
+
 def test_compare_with_vtk(data_array1, data_array2, vtk_double):
     assert data_array1 != vtk_double
     assert data_array2 == vtk_double
@@ -35,8 +36,8 @@ def test_compare_with_vtk(data_array1, data_array2, vtk_double):
 def test_data_array(data_array1, data_array2):
     assert data_array1 == data_array1
     assert data_array2 == data_array2
-    assert str(data_array1) == 'test_name\n[ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]'
-    assert str(data_array2) == 'test_name_modified\n[ 0.  1.  2.  3.  4.]'
+    assert str(data_array1) == 'test_name: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]'
+    assert str(data_array2) == 'test_name_modified: [ 0.  1.  2.  3.  4.]'
 
     assert data_array1 == np.arange(10)
     assert data_array2 == np.arange(5)
@@ -111,6 +112,7 @@ def test_insert_remove_values_vtk(vtk_double):
     assert array[5] == 99
     assert array == np.array([0, 1, 2, 3, 4, 99])
     assert array == [0, 1, 2, 3, 4, 99]
+    assert str(array) == 'test_name_modified: [  0.   1.   2.   3.   4.  99.]'
 
     array.RemoveLastTuple()
     assert array.numpy.size == 5
@@ -118,3 +120,16 @@ def test_insert_remove_values_vtk(vtk_double):
     assert array == [0, 1, 2, 3, 4]
     assert array == np.array([0, 1, 2, 3, 4])
     assert array.GetTuple1(4) == 4
+
+
+def test_replace_values_numpy(vtk_double):
+    array = BaseArray(vtk_double)
+
+    array.numpy = np.ones(3)
+
+    assert array == np.ones(3)
+    assert array.GetTuple1(0) == 1
+    assert array.GetTuple1(1) == 1
+    assert array.GetTuple1(2) == 1
+    assert np.array_equal(array.numpy, np.ones(3))
+    assert str(array) == 'test_name_modified: [ 1.  1.  1.]'
