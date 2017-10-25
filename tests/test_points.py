@@ -21,9 +21,9 @@ def np_points():
     return points
 
 def test_create_points(vtk_points, np_points):
-    # points = Points(vtk_points)
-    # assert points == vtk_points
-    # assert points == np_points
+    points = Points(vtk_points)
+    assert points == vtk_points
+    assert points == np_points
 
     points = Points(np_points)
     assert points == vtk_points

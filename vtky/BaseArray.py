@@ -41,12 +41,7 @@ class BaseArray(object):
 
     @numpy.setter
     def numpy(self, np_array):
-        name = self.GetName()
-        new_vtk = ns.numpy_to_vtk(np_array, array_type=self._vtk.GetDataType())
-        new_vtk.SetName(name)
-        self._numpy = np_array
-        new_vtk._np = np_array
-        self._vtk = new_vtk
+        self._set_data_array(np_array)
 
     @property
     def vtk(self):
@@ -123,23 +118,17 @@ class BaseArray(object):
             self._numpy = np.vstack((self._numpy, row_val))
             self._set_data_array(self._numpy)
 
-    def _set_data_array(self, array):
+    def _set_data_array(self, np_array):
         '''
         Receives a numpy array and set it to a private attribute
         :param array: numpy array
         '''
-        if not array.flags.contiguous:
-            array = np.ascontiguousarray(array)
-
-        if len(array.shape) == 1:
-            self.SetNumberOfComponents(1)
-        else:
-            self.SetNumberOfComponents(array.shape[1])
-
-        self.SetNumberOfTuples(array.shape[0])
-        data_flat = np.ravel(array)
-        self._numpy = data_flat
-        self.SetVoidArray(self._numpy, len(data_flat), 1)
+        name = self.GetName()
+        new_vtk = ns.numpy_to_vtk(np_array, array_type=self._vtk.GetDataType())
+        new_vtk.SetName(name)
+        self._numpy = np_array
+        new_vtk._np = np_array
+        self._vtk = new_vtk
 
     def _update_numpy(self, *args, **kwargs):
         '''

@@ -7,7 +7,7 @@ from vtky.BaseArray import BaseArray
 
 class Points(object):
 
-    def __init__(self, array, array_name='point_values'):
+    def __init__(self, array, array_name='Points'):
         if isinstance(array, list):
             array = np.array(array)
         elif isinstance(array, pd.DataFrame):
@@ -29,7 +29,6 @@ class Points(object):
             self._vtk = vtk.vtkPoints()
             self._vtk.SetData(self._points.vtk)
             self._points.SetName(array_name)
-            self._points = self._points.numpy.reshape(-1, 3)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
