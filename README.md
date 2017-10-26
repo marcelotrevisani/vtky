@@ -19,13 +19,13 @@ Features
     * vtkUnsignedLongArray
     * vtkUnsignedLongLongArray
     * vtkUnsignedShortArray
+    * vtkPoints
 
 
 To Do
 -----
-* Tests to see if support multidimensional arrays
+
 * Support for vtk data objects:
-    * vtkPoints
     * vtkPointData
     * vtkCharArray
     * vtkStringArray
@@ -57,7 +57,6 @@ Requirements
 * vtk >= 7.0.0
 * numpy
 * pandas
-* six
 * pytest >= 3.1.1
 
 
