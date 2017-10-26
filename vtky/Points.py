@@ -96,7 +96,7 @@ class Points(object):
                     :return:
                     '''
                     result = attr(*args, **kwargs)
-                    self._points = BaseArray(self._vtk.GetData())
+                    self._points.Modified()
                     return result
 
                 return _vtk_method_proxy
