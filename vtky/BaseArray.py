@@ -7,6 +7,7 @@ from vtk.util import numpy_support as ns
 class BaseArray(object):
 
     def __init__(self, array, type=None):
+        self._vtk = None
         if isinstance(array, list):
             array = np.array(array)
         elif isinstance(array, pd.DataFrame):
@@ -30,7 +31,7 @@ class BaseArray(object):
                 np_array = ns.vtk_to_numpy(array).astype(type)
                 self._vtk = ns.create_vtk_array(ns.get_vtk_array_type(np_array))
                 self._vtk.SetName(array.GetName())
-                self._set_data_array(np_array)
+                self.numpy_to_vtk(np_array)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
         self._vtk.AddObserver(vtk.vtkCommand.ModifiedEvent, self._update_numpy)
@@ -41,7 +42,11 @@ class BaseArray(object):
 
     @numpy.setter
     def numpy(self, np_array):
-        self._set_data_array(np_array)
+        if np_array.flags.contiguous:
+            np_array = np.ascontiguousarray(np_array)
+
+        self._numpy = np_array
+        self.numpy_to_vtk(self._numpy)
 
     @property
     def vtk(self):
@@ -60,7 +65,7 @@ class BaseArray(object):
                 def _vtk_method_proxy(*args, **kwargs):
                     '''
                     This is black magic, do not do this at home. :)
-                    It is need because the self._vtk.AddObserver(vtk.vtkCommand.ModifiedEvent, self._update_numpy)
+                    It is need because the self._vtk.AddObserver(vtk.vtkCommand.ModifiedEvent, update_numpy)
                     only works if the method Modified() is called, when we add a value or remove it, it will not
                     be called.
                     :param args:
@@ -82,10 +87,11 @@ class BaseArray(object):
             return np.array_equal(self._numpy, other)
         condition = True
         if isinstance(other, BaseArray):
-            condition = self._numpy.shape == other._numpy.shape
-        return self.GetNumberOfComponents() == other.GetNumberOfComponents() and \
-               self.GetNumberOfTuples() == other.GetNumberOfTuples() and \
-               condition and self.GetName() == other.GetName()
+            condition = self._numpy.shape == other.numpy.shape
+        return self.GetNumberOfComponents() == other.GetNumberOfComponents() \
+               and self.GetNumberOfTuples() == other.GetNumberOfTuples() \
+               and condition \
+               and self.GetName() == other.GetName()
 
     def __contains__(self, item):
         return item in self._numpy
@@ -145,3 +151,67 @@ class BaseArray(object):
         :return:
         '''
         self._set_data_array(array)
+
+    def numpy_to_vtk(self, num_array):
+        """
+        Code adapted from official VTK Project.
+        License and original code can be found here:
+        https://gitlab.kitware.com/vtk/vtk/blob/master/Wrapping/Python/vtk/util/numpy_support.py
+
+        Converts a real numpy Array to a VTK array object.
+
+        This function only works for real arrays.
+        Complex arrays are NOT handled.  It also works for multi-component
+        arrays.  However, only 1, and 2 dimensional arrays are supported.
+        This function is very efficient, so large arrays should not be a
+        problem.
+
+        If the second argument is set to 1, the array is deep-copied from
+        from numpy. This is not as efficient as the default behavior
+        (shallow copy) and uses more memory but detaches the two arrays
+        such that the numpy array can be released.
+
+        WARNING: You must maintain a reference to the passed numpy array, if
+        the numpy data is gc'd and VTK will point to garbage which will in
+        the best case give you a segfault.
+
+        Parameters:
+
+        num_array
+          a 1D or 2D, real numpy array.
+
+        """
+
+        if not num_array.flags.contiguous:
+            num_array = np.ascontiguousarray(num_array)
+
+        shape = num_array.shape
+        assert num_array.flags.contiguous, 'Only contiguous arrays are supported.'
+        assert len(shape) < 3, \
+            "Only arrays of dimensionality 2 or lower are allowed!"
+        assert not np.issubdtype(num_array.dtype, complex), \
+            "Complex numpy arrays cannot be converted to vtk arrays." \
+            "Use real() or imag() to get a component of the array before" \
+            " passing it to vtk."
+
+        # Fixup shape in case its empty or scalar.
+        try:
+            testVar = shape[0]
+        except:
+            shape = (0,)
+
+        # Find the shape and set number of components.
+        if len(shape) == 1:
+            self._vtk.SetNumberOfComponents(1)
+        else:
+            self._vtk.SetNumberOfComponents(shape[1])
+
+        self._vtk.SetNumberOfTuples(shape[0])
+
+        # Ravel the array appropriately.
+        array_flat = np.ravel(num_array)
+
+        # Point the VTK array to the numpy data.  The last argument (1)
+        # tells the array not to deallocate.
+        self._vtk.SetVoidArray(array_flat, array_flat.size, 1)
+        self._vtk._numpy_reference = num_array

@@ -1,7 +1,9 @@
 import pytest
 import vtk
+from vtk.util import numpy_support as ns
 
 from vtky.DataArray import *
+
 
 @pytest.fixture
 def data_array1():
@@ -124,7 +126,6 @@ def test_insert_remove_values_vtk(vtk_double):
 
 def test_replace_values_numpy(vtk_double):
     array = BaseArray(vtk_double)
-
     array.numpy = np.ones(3)
 
     assert array == np.ones(3)
@@ -133,3 +134,40 @@ def test_replace_values_numpy(vtk_double):
     assert array.GetTuple1(2) == 1
     assert np.array_equal(array.numpy, np.ones(3))
     assert str(array) == 'test_name_modified: [ 1.  1.  1.]'
+
+
+@pytest.fixture
+def vtk_3d(numpy_3d):
+    vtk_array = ns.numpy_to_vtk(numpy_3d)
+    vtk_array.SetName('VTK3D')
+    return vtk_array
+
+@pytest.fixture
+def numpy_3d():
+    return np.arange(9).reshape(-1, 3)
+
+
+def test_3d_array(vtk_3d, numpy_3d):
+    def _aux_test(array, name):
+        array = BaseArray(array)
+        array.SetName(name)
+        assert array == array
+        assert np.array_equal(array.numpy, numpy_3d)
+        assert str(array) == 'VTK3D: [[0 1 2]\n [3 4 5]\n [6 7 8]]'
+
+        assert array[0, 0] == 0
+        assert array[0, 1] == 1
+        assert array[0, 2] == 2
+        assert array[1, 0] == 3
+        assert array[1, 1] == 4
+        assert array[1, 2] == 5
+        assert array[2, 0] == 6
+        assert array[2, 1] == 7
+        assert array[2, 2] == 8
+
+        assert array.GetTuple3(0) == (0, 1, 2)
+        assert array.GetTuple3(1) == (3, 4, 5)
+        assert array.GetTuple3(2) == (6, 7, 8)
+
+    _aux_test(vtk_3d, vtk_3d.GetName())
+    _aux_test(numpy_3d, 'VTK3D')
