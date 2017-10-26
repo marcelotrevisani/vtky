@@ -79,7 +79,7 @@ Contributions are very welcome.
 License
 -------
 
-Distributed under the terms of the `MIT` license, "pytest-vtk" is free and open source software
+Distributed under the terms of the `MIT` license, "vtk" is free and open source software
 
 
 Issues
