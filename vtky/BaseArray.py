@@ -56,7 +56,7 @@ class BaseArray(object):
     def vtk(self, vtk_object):
         self._vtk = vtk_object
         array = ns.vtk_to_numpy(self._vtk)
-        self._set_data_array(array)
+        self.numpy_to_vtk(array)
 
     def __getattr__(self, item):
         try:
@@ -148,19 +148,8 @@ class BaseArray(object):
             self._numpy = row_val
         else:
             self._numpy = np.vstack((self._numpy, row_val))
-            self._set_data_array(self._numpy)
+            self.numpy_to_vtk(self._numpy)
 
-    def _set_data_array(self, np_array):
-        '''
-        Receives a numpy array and set it to a private attribute
-        :param array: numpy array
-        '''
-        name = self.GetName()
-        new_vtk = ns.numpy_to_vtk(np_array, array_type=self._vtk.GetDataType())
-        new_vtk.SetName(name)
-        self._numpy = np_array
-        new_vtk._np = np_array
-        self._vtk = new_vtk
 
     def _update_numpy(self, *args, **kwargs):
         '''
@@ -176,7 +165,7 @@ class BaseArray(object):
         :param array: receives a pandas DataFrame, numpy array or a list
         :return:
         '''
-        self._set_data_array(array)
+        self.numpy_to_vtk(array)
 
     def numpy_to_vtk(self, num_array):
         """
