@@ -113,6 +113,32 @@ class BaseArray(object):
     def __str__(self):
         return '{}: {}'.format(self.GetName(), self._numpy)
 
+    def _convert_list_pandas_to_numpy(self, data_array):
+        result = None
+        if isinstance(data_array, list):
+            result = np.array(data_array)
+        elif isinstance(data_array, pd.DataFrame):
+            result = data_array.as_matrix()
+        if result and not result.flags.contiguous:
+            return np.ascontiguousarray(result)
+        if result:
+            return result
+        return data_array
+
+    def __add__(self, other):
+        cls = type(self)
+        add_part = self._convert_list_pandas_to_numpy(other)
+        result = cls(self._numpy + add_part)
+        result.SetName(self.GetName())
+        return result
+
+    def __sub__(self, other):
+        cls = type(self)
+        sub_part = self._convert_list_pandas_to_numpy(other)
+        result = cls(self._numpy - sub_part)
+        result.SetName(self.GetName())
+        return result
+
     def add_row(self, row_val):
         '''
         Receives a new row which will be add to the vtkDataArray

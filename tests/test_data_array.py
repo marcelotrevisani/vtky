@@ -171,3 +171,27 @@ def test_3d_array(vtk_3d, numpy_3d):
 
     _aux_test(vtk_3d, vtk_3d.GetName())
     _aux_test(numpy_3d, 'VTK3D')
+
+def test_add(data_array2):
+    result = data_array2 + 10
+    assert result == [10, 11, 12, 13, 14]
+    assert isinstance(result, BaseArray)
+    assert result == np.array([10, 11, 12, 13, 14])
+    assert result.GetName() == data_array2.GetName()
+    assert result.GetTuple1(0) == 10
+    assert result.GetTuple1(1) == 11
+    assert result.GetTuple1(2) == 12
+    assert result.GetTuple1(3) == 13
+    assert result.GetTuple1(4) == 14
+
+def test_sub(data_array2):
+    result = data_array2 - 10
+    assert result == [-10, -9, -8, -7, -6]
+    assert isinstance(result, BaseArray)
+    assert result == np.array([-10, -9, -8, -7, -6])
+    assert result.GetName() == data_array2.GetName()
+    assert result.GetTuple1(0) == -10
+    assert result.GetTuple1(1) == -9
+    assert result.GetTuple1(2) == -8
+    assert result.GetTuple1(3) == -7
+    assert result.GetTuple1(4) == -6
