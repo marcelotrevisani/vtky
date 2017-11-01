@@ -126,18 +126,48 @@ class BaseArray(object):
         return data_array
 
     def __add__(self, other):
+        return self._do_operation(other, '+')
+
+    def __mul__(self, other):
+        return self._do_operation(other, '*')
+
+    def __truediv__(self, other):
+        return self._do_operation(other, '//')
+
+    def __div__(self, other):
+        return self._do_operation(other, '/')
+
+
+    def __sub__(self, other):
+        return self._do_operation(other, '-')
+
+    def _do_operation(self, other, operation):
+        '''
+        Method just to easily manipulate the operations in numpy array
+        :param other: Receives a number, pandas dataframe, numpy array, list or BaseArray which
+                        will be calculated
+        :param operation: Receives the symbol which represents the operation which will be executed
+        :return: Return a BaseArray calculated given the parameters
+        '''
         cls = type(self)
-        add_part = self._convert_list_pandas_to_numpy(other)
-        result = cls(self._numpy + add_part)
+        parc = self._convert_list_pandas_to_numpy(other)
+        result = None
+        if operation == '+':
+            result = self._numpy + parc
+        elif operation == '-':
+            result = self._numpy - parc
+        elif operation == '*':
+            result = self._numpy * parc
+        elif operation == '/':
+            result = self._numpy / parc
+        elif operation == '//':
+            result = self._numpy // parc
+        else:
+            raise ValueError('Expected a valid operation such as: +, -, *, /  Received: {}'.format(operation))
+        result = cls(result)
         result.SetName(self.GetName())
         return result
 
-    def __sub__(self, other):
-        cls = type(self)
-        sub_part = self._convert_list_pandas_to_numpy(other)
-        result = cls(self._numpy - sub_part)
-        result.SetName(self.GetName())
-        return result
 
     def add_row(self, row_val):
         '''

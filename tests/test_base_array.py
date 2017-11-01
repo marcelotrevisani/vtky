@@ -195,3 +195,27 @@ def test_sub(data_array2):
     assert result.GetTuple1(2) == -8
     assert result.GetTuple1(3) == -7
     assert result.GetTuple1(4) == -6
+
+def test_multiplication(data_array2):
+    result = data_array2 * 10
+    assert result == [0, 10, 20, 30, 40]
+    assert isinstance(result, BaseArray)
+    assert result == np.array([0, 10, 20, 30, 40])
+    assert result.GetName() == data_array2.GetName()
+    assert result.GetTuple1(0) == 0
+    assert result.GetTuple1(1) == 10
+    assert result.GetTuple1(2) == 20
+    assert result.GetTuple1(3) == 30
+    assert result.GetTuple1(4) == 40
+
+def test_div(data_array2):
+    result = data_array2 / 2.0
+    assert result == [0, 0.5, 1, 1.5, 2]
+    assert isinstance(result, BaseArray)
+    assert result == np.array([0, 0.5, 1, 1.5, 2])
+    assert result.GetName() == data_array2.GetName()
+    assert result.GetTuple1(0) == 0
+    assert result.GetTuple1(1) == 0.5
+    assert result.GetTuple1(2) == 1
+    assert result.GetTuple1(3) == 1.5
+    assert result.GetTuple1(4) == 2
