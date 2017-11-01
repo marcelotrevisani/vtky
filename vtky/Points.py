@@ -15,7 +15,7 @@ class Points(object):
 
         if isinstance(array, vtk.vtkPoints):
             self._vtk = array
-            self._points = BaseArray(array.GetData())
+            self._base_array = BaseArray(array.GetData())
         elif isinstance(array, np.ndarray):
             shape = array.shape
             if len(shape) != 2:
@@ -25,17 +25,52 @@ class Points(object):
             elif len(shape) == 2 and (shape[1] < 2 or shape[1] > 3):
                 raise ValueError('Expected a numpy array with 2 or 3 columns, received: {}'.format(shape[1]))
 
-            self._points = BaseArray(array)
+            self._base_array = BaseArray(array)
             self._vtk = vtk.vtkPoints()
-            self._vtk.SetData(self._points.vtk)
-            self._points.SetName(array_name)
+            self._vtk.SetData(self._base_array.vtk)
+            self._base_array.SetName(array_name)
         else:
             raise ValueError('Expected a Numpy array, but received a: {}'.format(type(array)))
 
     def __eq__(self, other):
         if isinstance(other, vtk.vtkPoints):
-            return self._points == other.GetData()
-        return self._points == other
+            return self._base_array == other.GetData()
+        return self._base_array == other
+
+    def _do_operation(self, other, operation):
+        cls = type(self)
+        result = vtk.vtkPoints()
+        result.DeepCopy(self._vtk)
+        result_cls = cls(result)
+        if operation == '+':
+            result_cls._base_array = self._base_array + other
+        elif operation == '-':
+            result_cls._base_array = self._base_array - other
+        elif operation == '*':
+            result_cls._base_array = self._base_array * other
+        elif operation == '//':
+            result_cls._base_array = self._base_array // other
+        elif operation == '/':
+            result_cls._base_array = self._base_array / other
+        else:
+            raise ValueError('Expected a valid operation such as: +, -, *, /  Received: {}'.format(operation))
+        result_cls.SetData(result_cls._base_array._vtk)
+        return result_cls
+
+    def __add__(self, other):
+        return self._do_operation(other, '+')
+
+    def __mul__(self, other):
+        return self._do_operation(other, '*')
+
+    def __truediv__(self, other):
+        return self._do_operation(other, '//')
+
+    def __div__(self, other):
+        return self._do_operation(other, '/')
+
+    def __sub__(self, other):
+        return self._do_operation(other, '-')
 
     def _check_size_column(self, array):
         if len(array.shape) != 1:
@@ -45,41 +80,41 @@ class Points(object):
 
     @property
     def x(self):
-        return self._points.numpy[:, 0]
+        return self._base_array.numpy[:, 0]
 
     @x.setter
     def x(self, value):
         value = np.array(value)
         self._check_size_column(value)
-        self._points.numpy[:, 0] = value
+        self._base_array.numpy[:, 0] = value
 
     @property
     def y(self):
-        return self._points.numpy[:, 1]
+        return self._base_array.numpy[:, 1]
 
     @y.setter
     def y(self, value):
         value = np.array(value)
         self._check_size_column(value)
-        self._points.numpy[:, 1] = value
+        self._base_array.numpy[:, 1] = value
 
     @property
     def z(self):
-        return self._points.numpy[:, 2]
+        return self._base_array.numpy[:, 2]
 
     @z.setter
     def z(self, value):
         value = np.array(value)
         self._check_size_column(value)
-        self._points.numpy[:, 2] = value
+        self._base_array.numpy[:, 2] = value
 
     @property
     def xyz(self):
-        return self._points.numpy
+        return self._base_array.numpy
 
     @xyz.setter
     def xyz(self, value):
-        self._points.numpy = value
+        self._base_array.numpy = value
 
     def __getattr__(self, item):
         try:
@@ -96,7 +131,7 @@ class Points(object):
                     :return:
                     '''
                     result = attr(*args, **kwargs)
-                    self._points.GetName()
+                    self._base_array.GetName()
                     return result
 
                 return _vtk_method_proxy
@@ -106,7 +141,7 @@ class Points(object):
             raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __getitem__(self, index):
-        return self._points[index]
+        return self._base_array[index]
 
     def add_row(self, points):
         '''

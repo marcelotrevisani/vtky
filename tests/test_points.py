@@ -96,3 +96,35 @@ def test_add_points_vtk(np_points):
     assert points.GetPoint(1) == (1, 2, 3)
     assert points.GetPoint(2) == (2, 3, 4)
     assert points.GetPoint(3) == (9, 9, 9)
+
+def test_add(points, np_points):
+    np_points = np_points + 10
+    points = points + 10
+    assert points == np_points
+    assert points.GetPoint(0) == (10, 11, 12)
+    assert points.GetPoint(1) == (11, 12, 13)
+    assert points.GetPoint(2) == (12, 13, 14)
+
+def test_sub(points, np_points):
+    np_points = np_points - 1
+    points = points - 1
+    assert points == np_points
+    assert points.GetPoint(0) == (-1, 0, 1)
+    assert points.GetPoint(1) == (0, 1, 2)
+    assert points.GetPoint(2) == (1, 2, 3)
+
+def test_mult(points, np_points):
+    np_points = np_points * 10
+    points = points * 10
+    assert points == np_points
+    assert points.GetPoint(0) == (0, 10, 20)
+    assert points.GetPoint(1) == (10, 20, 30)
+    assert points.GetPoint(2) == (20, 30, 40)
+
+def test_div(points, np_points):
+    np_points = np_points / 10
+    points = points / 10
+    assert points == np_points
+    assert points.GetPoint(0) == (.0, .1, .2)
+    assert points.GetPoint(1) == (.1, .2, .3)
+    assert points.GetPoint(2) == (.2, .3, .4)
