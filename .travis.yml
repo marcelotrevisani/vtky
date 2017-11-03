@@ -1,0 +1,43 @@
+# Config file for automatic testing at travis-ci.org
+
+sudo: required
+language: python
+env:
+  global:
+      # used by ci-helpers
+    - CONDA_CHANNELS=conda-forge SETUP_XVFB=true  DEPS="pytest tox numpy pandas vtk coveralls"
+  matrix:
+      include:
+        - python: 2.7
+          env: PYTESTVTK_ENV=py27
+        - python: 3.3
+          env: PYTESTVTK_ENV=py33
+        - python: 3.4
+          env: PYTESTVTK_ENV=py34
+        - python: 3.5
+          env: PYTESTVTK_ENV=py35
+        - python: 3.6
+          env: PYTESTVTK_ENV=py36
+        - python: pypy
+          env: PYTESTVTK_ENV=pypy
+        - python: 3.6
+          env: PYTESTVTK_ENV=flake8
+
+install:
+  # Setup miniconda
+  - git clone --depth 1 git://github.com/astropy/ci-helpers.git
+  - CONDA_DEPENDENCIES="${DEPS} " source ci-helpers/travis/setup_conda.sh
+  - source activate test && pip install -e .
+
+before_cache:
+  - rm -rf $HOME/.cache/pip/log
+
+script:
+  - source activate test && catchsegv coverage run --source=vtky -m pytest -v tests
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    
+after_success:
+  - coveralls
