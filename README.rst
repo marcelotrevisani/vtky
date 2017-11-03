@@ -1,4 +1,17 @@
-# vtky
+====
+vtky
+====
+
+.. image:: https://travis-ci.org/marcelotrevisani/vtky.svg?branch=master
+    :target: https://travis-ci.org/marcelotrevisani/vtky
+    :alt: See Build Status on Travis CI
+
+.. image:: https://ci.appveyor.com/api/projects/status/github/marcelotrevisani/vtky?branch=master
+    :target: https://ci.appveyor.com/project/marcelotrevisani/vtky/branch/master
+    :alt: See Build Status on AppVeyor
+    
+.. image:: https://coveralls.io/repos/github/marcelotrevisani/vtky/badge.svg?branch=master
+    :target: https://coveralls.io/github/marcelotrevisani/vtky?branch=master
 
 
 This project is just to easily manipulate the vtk library
