@@ -33,6 +33,10 @@ def test_create_points(vtk_points, np_points):
     assert points == vtk_points
     assert points == np_points
 
+def test_compare_points(points, np_points):
+    points2 = Points(np_points)
+    assert points == points2
+
 def test_xyz_points(points, np_points):
     assert np.array_equal(points.x, np_points[:, 0])
     assert np.array_equal(points.y, np_points[:, 1])

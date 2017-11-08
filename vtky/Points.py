@@ -35,6 +35,8 @@ class Points(object):
     def __eq__(self, other):
         if isinstance(other, vtk.vtkPoints):
             return self._base_array == other.GetData()
+        if isinstance(other, Points):
+            return self._base_array == other.xyz
         return self._base_array == other
 
     def _do_operation(self, other, operation):
