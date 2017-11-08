@@ -7,7 +7,7 @@ from vtky.DataArray import *
 
 @pytest.fixture
 def data_array1():
-    result = BaseArray(np.arange(10, dtype=np.double))
+    result = BaseArray(np.arange(10, dtype=np.double), np.double)
     result.SetName('test_name')
     return result
 
@@ -22,13 +22,35 @@ def data_array2():
 def vtk_double():
     result = vtk.vtkDoubleArray()
     result.SetName('test_name_modified')
-    result.InsertNextValue(0)
-    result.InsertNextValue(1)
-    result.InsertNextValue(2)
-    result.InsertNextValue(3)
-    result.InsertNextValue(4)
+    result.InsertNextValue(0.0)
+    result.InsertNextValue(1.0)
+    result.InsertNextValue(2.0)
+    result.InsertNextValue(3.0)
+    result.InsertNextValue(4.0)
     return result
 
+
+def test_compare_list(data_array2):
+    list = [0., 1., 2., 3., 4.]
+    assert data_array2 == list
+
+    array = BaseArray(list)
+    assert array == list
+
+def test_set_vtk(vtk_double, data_array2, data_array1):
+    array = DoubleArray()
+    array.vtk = vtk_double
+    assert array == vtk_double
+    assert array == data_array2
+    assert array != data_array1
+
+def test_compare_dataframe(data_array2):
+    import pandas as pd
+    dataframe = pd.DataFrame([0., 1., 2., 3., 4.])
+    assert data_array2 == dataframe
+
+    array = BaseArray(dataframe)
+    assert array == dataframe
 
 def test_compare_with_vtk(data_array1, data_array2, vtk_double):
     assert data_array1 != vtk_double

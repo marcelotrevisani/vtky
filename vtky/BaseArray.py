@@ -13,10 +13,7 @@ class BaseArray(object):
         :param type_array: Receives the vtk data type or a numpy array type
         '''
         self._vtk = None
-        if isinstance(array, list):
-            array = np.array(array)
-        elif isinstance(array, pd.DataFrame):
-            array = array.as_matrix()
+        array = self._convert_list_pandas_to_numpy(array)
 
         vtk_type = None
         np_type = None
@@ -69,9 +66,12 @@ class BaseArray(object):
 
     @vtk.setter
     def vtk(self, vtk_object):
+        if not isinstance(vtk_object, vtk.vtkDataArray):
+            raise TypeError('Expected a vtkDataArray object, got {}'.format(type(vtk_object)))
         self._vtk = vtk_object
-        array = ns.vtk_to_numpy(self._vtk)
+        array = ns.vtk_to_numpy(vtk_object)
         self.numpy_to_vtk(array)
+        self._numpy = array
 
     def __getattr__(self, item):
         try:
@@ -98,7 +98,9 @@ class BaseArray(object):
             raise AttributeError('Object has not attribute {}'.format(msg.message))
 
     def __eq__(self, other):
-        if isinstance(other, (np.ndarray, list)):
+        other = self._convert_list_pandas_to_numpy(other)
+
+        if isinstance(other, np.ndarray):
             return np.array_equal(self._numpy, other)
         condition = True
         if isinstance(other, BaseArray):
@@ -107,6 +109,9 @@ class BaseArray(object):
                and self.GetNumberOfTuples() == other.GetNumberOfTuples() \
                and condition \
                and self.GetName() == other.GetName()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __contains__(self, item):
         return item in self._numpy
@@ -134,9 +139,11 @@ class BaseArray(object):
             result = np.array(data_array)
         elif isinstance(data_array, pd.DataFrame):
             result = data_array.as_matrix()
-        if result and not result.flags.contiguous:
-            return np.ascontiguousarray(result)
-        if result:
+            if not result.flags.contiguous:
+                result = np.ascontiguousarray(result)
+            if result.shape[1] == 1:
+                result = result.reshape(-1)
+        if not result is None:
             return result
         return data_array
 
