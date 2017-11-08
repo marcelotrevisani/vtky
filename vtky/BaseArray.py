@@ -6,30 +6,45 @@ from vtk.util import numpy_support as ns
 
 class BaseArray(object):
 
-    def __init__(self, array, type=None):
+    def __init__(self, array, type_array=None):
+        '''
+
+        :param array: Receives a pandas DataFrame, or numpy array or vtkDataArray
+        :param type_array: Receives the vtk data type or a numpy array type
+        '''
         self._vtk = None
         if isinstance(array, list):
             array = np.array(array)
         elif isinstance(array, pd.DataFrame):
             array = array.as_matrix()
 
+        vtk_type = None
+        np_type = None
+        if isinstance(type_array, int):
+            vtk_type = type_array
+            np_type = ns.get_vtk_to_numpy_typemap()[type_array]
+        elif isinstance(type_array, type):
+            vtk_type = ns.get_vtk_array_type(type_array)
+            np_type = type_array
+
         if isinstance(array, np.ndarray):
             if not array.flags.contiguous:
                 array = np.ascontiguousarray(array)
-            if type:
-                array = array.astype(type)
+            if np_type:
+                array = array.astype(np_type)
             self._numpy = array
-            self._vtk = ns.numpy_to_vtk(self._numpy)
+            self._vtk = ns.numpy_to_vtk(self._numpy, array_type=vtk_type)
             self._vtk._np = array
         elif isinstance(array, vtk.vtkDataArray):
-            if type is None or array.GetDataType() == ns.get_vtk_array_type(type):
+            if type_array is None or array.GetDataType() == vtk_type:
                 self._vtk = array
                 self._numpy = ns.vtk_to_numpy(array)
             else:
-                if type is None:
-                    type = np.double
-                np_array = ns.vtk_to_numpy(array).astype(type)
-                self._vtk = ns.create_vtk_array(ns.get_vtk_array_type(np_array))
+                if type_array is None:
+                    np_type = np.double
+                    vtk_type = vtk.VTK_DOUBLE
+                np_array = ns.vtk_to_numpy(array).astype(np_type)
+                self._vtk = ns.create_vtk_array(vtk_type)
                 self._vtk.SetName(array.GetName())
                 self.numpy_to_vtk(np_array)
         else:
